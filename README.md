@@ -104,9 +104,6 @@ python tools/relation_test_net.py --config-file '/path/to/config_file.yaml'
 ## Models
 Here we provide our pretrained model, please see [Models.md](./Models.md)
 
-## Acknowledgements
-
-
 
 ## Citation
 
