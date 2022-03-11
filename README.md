@@ -18,7 +18,7 @@ This project is based on the code of [Scene Graph Benchmark in Pytorch](https://
 
 **Method overview**
 
-![overall structure](assets\model.png)
+![overall structure](assets/model.png)
 
 
 
