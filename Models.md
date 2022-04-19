@@ -1,6 +1,6 @@
-#Detector ckpt:
+# Detector ckpt:
 + [model]()
-#SGG models:
+# SGG models:
 |                   | Predcls |       |        |      | SGcls |       |        |      | SGdet |       |        |      |
 | ----------------- | ------- | ----- | ------ | ---- | ----- | ----- | ------ | ---- | ----- | ----- | ------ | ---- |
 | Models            | mR@20   | mR@50 | mR@100 | ckpt | mR@20 | mR@50 | mR@100 | ckpt | mR@20 | mR@50 | mR@100 | ckpt |

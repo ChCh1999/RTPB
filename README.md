@@ -1,5 +1,5 @@
 # Resistance Training using Prior Bias (RTPB)
-This is an official implementation for AAAI 2022 paper "Resistance Training using Prior Bias: toward Unbiased Scene Graph Generation". 
+This is an official implementation for AAAI 2022 paper "[Resistance Training using Prior Bias: toward Unbiased Scene Graph Generation](https://arxiv.org/abs/2201.06794)". 
 
 
 
@@ -61,7 +61,9 @@ conda activate rtpb
 
   
 
-- install this repo in `develop` mode
+- compile extensions and install this repo in `develop` mode
+
+  **If your pytorch is 1.10.\* or older version, please use files in folder `csrc_backup` replace files in `maskrcnn_benchmark/csrc` first.**
 
   ```
   python setup.py build develop

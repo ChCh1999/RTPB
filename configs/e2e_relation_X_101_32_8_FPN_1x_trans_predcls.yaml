@@ -1,4 +1,4 @@
-GLOVE_DIR: /public/data1/users/chenchao278/model/glove
+GLOVE_DIR: $GLOVE_DIR
 INPUT:
   MIN_SIZE_TRAIN: (600,)
   MAX_SIZE_TRAIN: 1000
@@ -88,18 +88,6 @@ MODEL:
     ############### Parameters for Transformer Predictor ##############
     TRANSFORMER:
       DROPOUT_RATE: 0.1
-      USE_GRAPH_EMBEDDING: False
-      GRAPH_EBD:
-        ENCODE_LAYER: GCN
-        GRAPH_BIAS: one
-        GAT:
-          DROPOUT: 0.1
-          HID_DIM: 128
-          LEAKY_RELU_ALPHA: 0.001
-          NUM_HEAD: 8
-        GCN:
-          DROPOUT: 0.1
-          HID_DIM: 128
       OBJ_LAYER: 4
       REL_LAYER: 2
       NUM_HEAD: 8

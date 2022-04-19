@@ -6,7 +6,8 @@ import copy
 
 #
 class DatasetCatalog(object):
-    DATA_DIR = "/public/data0/users/chenchao278/data"
+    # configure your dataset root here
+    DATA_DIR = "/path/to/your/dataset/root/"
     DATASETS = {
         "coco_2017_train": {
             "img_dir": "coco/train2017",

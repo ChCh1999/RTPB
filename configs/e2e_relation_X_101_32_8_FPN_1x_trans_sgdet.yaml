@@ -1,4 +1,4 @@
-GLOVE_DIR: /public/data1/users/chenchao278/model/glove
+GLOVE_DIR: $GLOVE_DIR
 CONCEPTNET_DIR: /public/data1/users/chenchao278/data/conceptNet/
 INPUT:
   MIN_SIZE_TRAIN: (600,)
