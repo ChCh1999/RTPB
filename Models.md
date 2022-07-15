@@ -1,5 +1,5 @@
 # Detector ckpt:
-+ [model]()
++ [model](http://s3.cn-north-1.jdcloud-oss.com/jde-oss-002/chenchao278/model/detector_base_x32/model_final.pth)
 # SGG models:
 |                   | Predcls |       |        |      | SGcls |       |        |      | SGdet |       |        |      |
 | ----------------- | ------- | ----- | ------ | ---- | ----- | ----- | ------ | ---- | ----- | ----- | ------ | ---- |
