@@ -134,7 +134,7 @@ class PenaltyModule(nn.Module):
             if self.penalty_bias.device != pred_dist.device:
                 self.penalty_bias = self.penalty_bias.to(pred_dist.device)
             resistance_bias = self.penalty_bias
-        elif self.penalty_type == 'count_bias':
+        elif self.penalty_type == 'count_bias' or self.penalty_type == 'pair_count_bias':
             if pred_dist is not None:
                 if self.penalty_bias.device != pred_dist.device:
                     self.penalty_bias = self.penalty_bias.to(pred_dist.device)
