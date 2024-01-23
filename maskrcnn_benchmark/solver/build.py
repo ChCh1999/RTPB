@@ -24,7 +24,19 @@ def make_optimizer(cfg, model, logger, slow_heads=None, slow_ratio=5.0, rl_facto
                     break
         params += [{"params": [value], "lr": lr * rl_factor, "weight_decay": weight_decay}]
 
-    optimizer = torch.optim.SGD(params, lr=cfg.SOLVER.BASE_LR, momentum=cfg.SOLVER.MOMENTUM)
+    lr = cfg.SOLVER.BASE_LR
+    weight_decay = cfg.SOLVER.WEIGHT_DECAY
+    opt_type = cfg.SOLVER.OPTIMIZER
+    if opt_type == "Adam":
+        optimizer = torch.optim.Adam(params, lr=lr)
+    elif opt_type == "AdamW":
+        optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=weight_decay, betas=(0.9, 0.99))
+    else:
+        # default sgd
+        optimizer = torch.optim.SGD(params, lr=lr, momentum=cfg.SOLVER.MOMENTUM)
+    return optimizer
+
+    # optimizer = torch.optim.SGD(params, lr=cfg.SOLVER.BASE_LR, momentum=cfg.SOLVER.MOMENTUM)
     return optimizer
 
 

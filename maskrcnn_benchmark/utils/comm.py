@@ -4,8 +4,10 @@ This is useful when doing distributed training.
 """
 
 import pickle
+import random
 import time
 
+import numpy as np
 import torch
 import torch.distributed as dist
 
@@ -54,8 +56,8 @@ def all_gather(data):
         list[data]: list of data gathered from each rank
     """
     to_device = "cuda"
-    #to_device = torch.device("cpu")
-    
+    # to_device = torch.device("cpu")
+
     world_size = get_world_size()
     if world_size == 1:
         return [data]
@@ -118,3 +120,13 @@ def reduce_dict(input_dict, average=True):
             values /= world_size
         reduced_dict = {k: v for k, v in zip(names, values)}
     return reduced_dict
+
+
+def seed_all(seed=1049):
+    torch.manual_seed(seed)  # Current CPU
+    torch.cuda.manual_seed(seed)  # Current GPU
+    torch.cuda.manual_seed_all(seed)  # All GPU (Optional)
+    np.random.seed(seed)  # Numpy module
+    random.seed(seed)  # Python random module
+    torch.backends.cudnn.benchmark = False  # Close optimization
+    torch.backends.cudnn.deterministic = True  # Close optimization

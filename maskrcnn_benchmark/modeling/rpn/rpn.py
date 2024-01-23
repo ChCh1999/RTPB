@@ -115,7 +115,7 @@ class RPNModule(torch.nn.Module):
     def __init__(self, cfg, in_channels):
         super(RPNModule, self).__init__()
 
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
 
         anchor_generator = make_anchor_generator(cfg)
 

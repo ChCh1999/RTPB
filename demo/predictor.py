@@ -136,7 +136,7 @@ class COCODemo(object):
         masks_per_dim=2,
         min_image_size=224,
     ):
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
         self.model = build_detection_model(cfg)
         self.model.eval()
         self.device = torch.device(cfg.MODEL.DEVICE)

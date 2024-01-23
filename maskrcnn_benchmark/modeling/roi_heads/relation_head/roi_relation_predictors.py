@@ -18,6 +18,7 @@ from .modules.bias_module import build_bias_module
 from .utils_relation import layer_init, get_box_info, get_box_pair_info
 from maskrcnn_benchmark.data import get_dataset_statistics
 from .model_dual_transformer import DualTransPredictor
+from .model_local_global_transformer import LocalGlobalTransPredictor
 
 
 @registry.ROI_RELATION_PREDICTOR.register("TransformerPredictor")
@@ -69,7 +70,8 @@ class TransformerPredictor(nn.Module):
         # bias module
         self.bias_module = build_bias_module(config, statistics)
 
-    def forward(self, proposals, rel_pair_idxs, rel_labels, rel_binarys, roi_features, union_features, logger=None):
+    def forward(self, proposals, rel_pair_idxs, rel_labels, roi_features, union_features, logger=None,
+                rel_binarys=None):
         """
         Returns:
             obj_dists (list[Tensor]): logits of object label distribution
@@ -114,8 +116,9 @@ class TransformerPredictor(nn.Module):
             else:
                 visual_rep = ctx_gate * union_features
 
-        rel_dists = self.rel_compress(visual_rep) + self.ctx_compress(prod_rep)
-
+            rel_dists = self.rel_compress(visual_rep) + self.ctx_compress(prod_rep)
+        else:
+            rel_dists = self.ctx_compress(prod_rep)
         # apply bias module
         gt = torch.cat(rel_labels, dim=0) if rel_labels is not None else None
         bias = self.bias_module.index_with_labels(pair_pred.long(), gt=gt)
@@ -162,7 +165,8 @@ class IMPPredictor(nn.Module):
             statistics = get_dataset_statistics(config)
             self.freq_bias = build_bias_module(config, statistics)
 
-    def forward(self, proposals, rel_pair_idxs, rel_labels, rel_binarys, roi_features, union_features, logger=None):
+    def forward(self, proposals, rel_pair_idxs, rel_labels, roi_features, union_features, logger=None,
+                rel_binarys=None):
         """
         Returns:
             obj_dists (list[Tensor]): logits of object label distribution
@@ -251,7 +255,8 @@ class MotifPredictor(nn.Module):
         # bias module
         self.bias_module = build_bias_module(config, statistics)
 
-    def forward(self, proposals, rel_pair_idxs, rel_labels, rel_binarys, roi_features, union_features, logger=None):
+    def forward(self, proposals, rel_pair_idxs, rel_labels, roi_features, union_features, logger=None,
+                rel_binarys=None):
         """
         Returns:
             obj_dists (list[Tensor]): logits of object label distribution
@@ -370,7 +375,8 @@ class VCTreePredictor(nn.Module):
         # bias module
         self.bias_module = build_bias_module(config, statistics)
 
-    def forward(self, proposals, rel_pair_idxs, rel_labels, rel_binarys, roi_features, union_features, logger=None):
+    def forward(self, proposals, rel_pair_idxs, rel_labels, roi_features, union_features, logger=None,
+                rel_binarys=None):
         """
         Returns:
             obj_dists (list[Tensor]): logits of object label distribution
@@ -567,7 +573,8 @@ class CausalAnalysisPredictor(nn.Module):
 
         return post_ctx_rep, pair_pred, pair_bbox, pair_obj_probs, binary_preds, obj_dist_prob, edge_rep, obj_dist_list
 
-    def forward(self, proposals, rel_pair_idxs, rel_labels, rel_binarys, roi_features, union_features, logger=None):
+    def forward(self, proposals, rel_pair_idxs, rel_labels, roi_features, union_features, logger=None,
+                rel_binarys=None):
         """
         Returns:
             obj_dists (list[Tensor]): logits of object label distribution

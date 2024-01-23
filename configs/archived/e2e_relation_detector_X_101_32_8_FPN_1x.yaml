@@ -1,22 +1,26 @@
 INPUT:
-  MIN_SIZE_TRAIN: (600,)
+  MIN_SIZE_TRAIN: [600,]
   MAX_SIZE_TRAIN: 1000
   MIN_SIZE_TEST: 600
   MAX_SIZE_TEST: 1000
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
+  WEIGHT: "catalog://ImageNetPretrained/FAIR/20171220/X-101-32x8d"
   BACKBONE:
-    CONV_BODY: "VGG-16"
+    CONV_BODY: "R-101-FPN"
   RESNETS:
-    BACKBONE_OUT_CHANNELS: 512
+    BACKBONE_OUT_CHANNELS: 256
+    STRIDE_IN_1X1: False
+    NUM_GROUPS: 32
+    WIDTH_PER_GROUP: 8
   RELATION_ON: False
   ATTRIBUTE_ON: False
   FLIP_AUG: False
   RPN:
-    USE_FPN: False
-    ANCHOR_SIZES: (32, 64, 128, 256, 512)
-    ANCHOR_STRIDE: (16,)
-    ASPECT_RATIOS: (0.23232838, 0.63365731, 1.28478321, 3.15089189)   # from neural-motifs
+    USE_FPN: True
+    ANCHOR_SIZES: [32, 64, 128, 256, 512]
+    ANCHOR_STRIDE: [4, 8, 16, 32, 64]
+    ASPECT_RATIOS: [0.23232838, 0.63365731, 1.28478321, 3.15089189]   # from neural-motifs
     PRE_NMS_TOP_N_TRAIN: 12000
     PRE_NMS_TOP_N_TEST: 6000
     POST_NMS_TOP_N_TRAIN: 2000
@@ -24,7 +28,7 @@ MODEL:
     FPN_POST_NMS_TOP_N_TRAIN: 2000
     FPN_POST_NMS_TOP_N_TEST: 2000
     FPN_POST_NMS_PER_BATCH: False
-    RPN_MID_CHANNEL: 512
+    RPN_MID_CHANNEL: 256
   ROI_HEADS:
     USE_FPN: True
     POSITIVE_FRACTION: 0.5
@@ -33,12 +37,12 @@ MODEL:
     DETECTIONS_PER_IMG: 256
   ROI_BOX_HEAD:
     POOLER_RESOLUTION: 7
-    POOLER_SCALES: (0.0625,)
+    POOLER_SCALES: [0.25, 0.125, 0.0625, 0.03125]
     POOLER_SAMPLING_RATIO: 2
     FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
     PREDICTOR: "FPNPredictor"
     NUM_CLASSES: 151                    # 151 for VG, 1201 for GQA
-    MLP_HEAD_DIM: 2048
+    MLP_HEAD_DIM: 4096
   ROI_ATTRIBUTE_HEAD:
     FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
     PREDICTOR: "FPNPredictor"
@@ -50,9 +54,9 @@ MODEL:
     ATTRIBUTE_BGFG_SAMPLE: True    
     ATTRIBUTE_BGFG_RATIO: 3        
 DATASETS:
-  TRAIN: ("VG_stanford_filtered_with_attribute_train",)
-  VAL: ("VG_stanford_filtered_with_attribute_val",)
-  TEST: ("VG_stanford_filtered_with_attribute_test",)
+  TRAIN: ["VG_stanford_filtered_with_attribute_train",]
+  VAL: ["VG_stanford_filtered_with_attribute_val",]
+  TEST: ["VG_stanford_filtered_with_attribute_test",]
 DATALOADER:
   SIZE_DIVISIBILITY: 32
 SOLVER:
@@ -61,8 +65,8 @@ SOLVER:
   WARMUP_FACTOR: 0.1
   MOMENTUM: 0.9
   GRAD_NORM_CLIP: 5.0
-  STEPS: (30000, 45000)
-  MAX_ITER: 90000
+  STEPS: [90000, 120000]
+  MAX_ITER: 180000
   PRINT_GRAD_FREQ: 5000
 OUTPUT_DIR: './output/relation_baseline'
 

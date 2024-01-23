@@ -3,6 +3,9 @@ import errno
 import json
 import logging
 import os
+
+from omegaconf import OmegaConf
+
 from .comm import is_main_process
 import numpy as np
 
@@ -38,9 +41,7 @@ def save_labels(dataset_list, output_dir):
 
 def save_config(cfg, path):
     if is_main_process():
-        with open(path, 'w') as f:
-            f.write(cfg.dump())
-
+        OmegaConf.save(cfg, path)
 
 def intersect_2d(x1, x2):
     """

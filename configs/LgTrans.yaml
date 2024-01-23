@@ -1,0 +1,165 @@
+DTYPE: "float32"
+INPUT:
+  MIN_SIZE_TRAIN: [ 600, ]
+  MAX_SIZE_TRAIN: 1000
+  MIN_SIZE_TEST: 600
+  MAX_SIZE_TEST: 1000
+MODEL:
+  BALANCED_NORM: False
+  PRETRAINED_DETECTOR_CKPT: "model/detector/detector_base_x32/model_final.pth"
+  PRETRAINED_DETECTOR_CKPT_GQA: ""
+  WEIGHT: ""
+  BACKBONE:
+    CONV_BODY: "R-101-FPN"
+  RESNETS:
+    BACKBONE_OUT_CHANNELS: 256
+    STRIDE_IN_1X1: False
+    NUM_GROUPS: 32
+    WIDTH_PER_GROUP: 8
+  RELATION_ON: True
+  ATTRIBUTE_ON: False
+  FLIP_AUG: False            # if there is any left-right relation, FLIP AUG should be false
+  RPN:
+    USE_FPN: True
+    ANCHOR_SIZES: [ 32, 64, 128, 256, 512 ]
+    ANCHOR_STRIDE: [ 4, 8, 16, 32, 64 ]
+    ASPECT_RATIOS: [ 0.23232838, 0.63365731, 1.28478321, 3.15089189 ]   # from neural-motifs
+    PRE_NMS_TOP_N_TRAIN: 6000
+    PRE_NMS_TOP_N_TEST: 6000
+    POST_NMS_TOP_N_TRAIN: 1000
+    POST_NMS_TOP_N_TEST: 1000
+    FPN_POST_NMS_TOP_N_TRAIN: 1000
+    FPN_POST_NMS_TOP_N_TEST: 1000
+    FPN_POST_NMS_PER_BATCH: False
+    RPN_MID_CHANNEL: 256
+  ROI_HEADS:
+    USE_FPN: True
+    POSITIVE_FRACTION: 0.5
+    BG_IOU_THRESHOLD: 0.3
+    BATCH_SIZE_PER_IMAGE: 256
+    DETECTIONS_PER_IMG: 80
+    NMS_FILTER_DUPLICATES: True
+  ROI_BOX_HEAD:
+    POOLER_RESOLUTION: 7
+    POOLER_SCALES: [ 0.25, 0.125, 0.0625, 0.03125 ]
+    POOLER_SAMPLING_RATIO: 2
+    FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
+    PREDICTOR: "FPNPredictor"
+    NUM_CLASSES: 151                # 151 for VG, 201 for GQA
+    #    GQA_200_NUM_CLASSES: 201         # 151 for VG, 201 for GQA
+    MLP_HEAD_DIM: 4096
+  ROI_ATTRIBUTE_HEAD:
+    FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
+    PREDICTOR: "FPNPredictor"
+    USE_BINARY_LOSS: True           # choose binary, because cross_entropy loss deteriorate the box head, even with 0.1 weight
+    POS_WEIGHT: 50.0
+    ATTRIBUTE_LOSS_WEIGHT: 1.0
+    NUM_ATTRIBUTES: 201             # 201 for VG, 501 for GQA
+    MAX_ATTRIBUTES: 10
+    ATTRIBUTE_BGFG_SAMPLE: True
+    ATTRIBUTE_BGFG_RATIO: 3
+  ROI_RELATION_HEAD:
+    POOLER_RESOLUTION: 8
+    USE_GT_BOX: False
+    USE_GT_OBJECT_LABEL: False
+    REQUIRE_BOX_OVERLAP: False              # for sgdet, during training, only train pairs with overlap
+    ADD_GTBOX_TO_PROPOSAL_IN_TRAIN: False    # for sgdet only, in case some gt boxes are missing
+    NUM_CLASSES: 51                 # 51 for VG, 101 for GQA [not contain "to the left of" & "to the right of"]
+    GQA_200_NUM_CLASSES: 101
+    BATCH_SIZE_PER_IMAGE: 1024      # sample as much as possible
+    POSITIVE_FRACTION: 0.25
+    CONTEXT_ROI_DIM: 256    # output feature dim of roi_feature_extractor for relationship;
+#      for FPN2dRelationFeatureExtractor, CONTEXT_ROI_DIM should be 256 which is backbone out channel
+    POOLING_ALL_LEVELS: True
+    LABEL_SMOOTHING_LOSS: False
+    FEATURE_EXTRACTOR: "RelationFeatureExtractor"
+    BOX_FEATURE_EXTRACTOR: "FPN2dRelationFeatureExtractor"
+    BOX_FEATURE_EXTRACTOR_PARAMS:
+      POOLER_RESOLUTION: 4
+      POOLER_SCALES: [ 0.25, 0.125, 0.0625, 0.03125 ]
+      POOLER_SAMPLING_RATIO: 3
+    #################### Select Relationship Model ####################
+    PREDICTOR: "LocalGlobalTransPredictor" #"VETOPredictor"
+    ############### Parameters for Transformer Predictor ##############
+    LG_TRANS:
+      MODEL_DIM: 512
+      USE_LOCAL_ENC: True
+      ROI_RESOLUTION: 4 # MODEL.ROI_RELATION_HEAD.BOX_FEATURE_EXTRACTOR_PARAMS.POOLER_RESOLUTION or MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
+      OBJ_ENC_LAYERS: 2
+      REL_ENC_LAYERS: 2
+      REL_ENC_INCLUDE_OBJ: True
+      CTX_LAYER: encoder # decoder
+      CTX_OBJ_ENC_LAYERS: 4
+      CTX_REL_ENC_LAYERS: 2
+      CTX_DEC_LAYERS: 2
+      USE_TOKEN_POOLING: True
+      TOKEN_POOLING_DIM: 256
+      JOINT_DECODING: True
+      OBJ_CLF_ENC: False
+      TRANSFORMER_PARAMS:
+        d_model: 512
+        nhead: 8
+        dim_feedforward: 2048
+        dropout: 0.1
+        norm_first: True
+DATASETS:
+  TRAIN: [ "VG_stanford_filtered_with_attribute_train" ]
+  VAL: [ "VG_stanford_filtered_with_attribute_val" ]
+  TEST: [ "VG_stanford_filtered_with_attribute_test" ]
+  #  VG_TRAIN: [ "VG_stanford_filtered_with_attribute_train" ]
+  #  VG_VAL: [ "VG_stanford_filtered_with_attribute_val" ]
+  #  VG_TEST: [ "VG_stanford_filtered_with_attribute_test" ]
+  GQA_200_TRAIN: [ "GQA_200_incl_depth_train", ]
+  GQA_200_VAL: [ "GQA_200_incl_depth_val", ]
+  GQA_200_TEST: [ "GQA_200_incl_depth_test", ]
+  USE_DEPTH: True
+  USE_BIAS: True
+  REORDER_FREQ_BASED: False
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+SOLVER:
+  BIAS_LR_FACTOR: 1
+  BASE_LR: 0.001
+  IMS_PER_BATCH: 16
+  STEPS:
+    - 10000
+    - 16000
+  WARMUP_FACTOR: 0.1
+  WARMUP_ITERS: 500
+  CLIP_NORM: 5.0
+  GAMMA: 0.1
+  GRAD_NORM_CLIP: 5.0
+  MAX_ITER: 50000 #80000
+  MOMENTUM: 0.9
+  PRE_VAL: false
+  PRINT_GRAD_FREQ: 50000
+  CHECKPOINT_PERIOD: 4000
+  VAL_PERIOD: 2000
+  OPTIMIZER: SGD
+  SCHEDULE:
+    COOLDOWN: 0
+    FACTOR: 0.1
+    MAX_DECAY_STEP: 3
+    PATIENCE: 2
+    THRESHOLD: 0.001
+    TYPE: WarmupMultiStepLR  # WarmupReduceLROnPlateau
+  TO_VAL: true
+  UPDATE_SCHEDULE_DURING_LOAD: false
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 1.0e-05
+  WEIGHT_DECAY_BIAS: 0.0
+OUTPUT_DIR: "model/"
+GLOVE_DIR: "model/glove"
+TEST:
+  IMS_PER_BATCH: 1
+  ALLOW_LOAD_FROM_CACHE: False
+  RELATION:
+    SYNC_GATHER: True      # turn on will slow down the evaluation to solve the sgdet test out of memory problem
+    REQUIRE_OVERLAP: False
+    LATER_NMS_PREDICTION_THRES: 0.5
+GLOBAL_SETTING:
+  DATASET_CHOICE: 'VG'
+  USE_BIAS: False                                      # If use the relation statistics to serve as the priori knowledge
+  BETA_LOSS: True
+  CHOOSE_BEST_MODEL_BY_METRIC: '_mean_recall'         # ['_recall', '_mean_recall'] To control which metric is the main concern
+  PRINT_INTERVAL: 100

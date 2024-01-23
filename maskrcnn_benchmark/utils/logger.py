@@ -3,11 +3,17 @@ import logging
 import os
 import sys
 
+import wandb
+
+from maskrcnn_benchmark.utils.comm import get_rank
+
 DEBUG_PRINT_ON = True
+
 
 def debug_print(logger, info):
     if DEBUG_PRINT_ON:
-        logger.info('#'*20+' '+info+' '+'#'*20)
+        logger.info('#' * 20 + ' ' + info + ' ' + '#' * 20)
+
 
 def setup_logger(name, save_dir, distributed_rank, filename="log.txt"):
     logger = logging.getLogger(name)
@@ -28,3 +34,10 @@ def setup_logger(name, save_dir, distributed_rank, filename="log.txt"):
         logger.addHandler(fh)
 
     return logger
+
+
+def log_result(tag, result):
+    if get_rank() <= 0:
+        for each_ds_eval in result:
+            for each_evalator_res in each_ds_eval[1]:
+                wandb.log({f"{tag}/{k}": v for k, v in each_evalator_res.items()})

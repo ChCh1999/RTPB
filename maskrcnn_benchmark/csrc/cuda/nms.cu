@@ -2,7 +2,7 @@
 #include <ATen/ATen.h>
 #include <ATen/cuda/CUDAContext.h>
 
-#include <THC/THC.h>
+// #include <THC/THC.h>
 #include <ATen/cuda/DeviceUtils.cuh>
 #include <ATen/ceil_div.h>
 #include <vector>
@@ -81,10 +81,10 @@ at::Tensor nms_cuda(const at::Tensor boxes, float nms_overlap_thresh) {
 
   scalar_t* boxes_dev = boxes_sorted.data<scalar_t>();
 
-  THCState *state = at::globalContext().lazyInitCUDA(); // TODO replace with getTHCState
+//   THCState *state = at::globalContext().lazyInitCUDA(); // TODO replace with getTHCState
 
   unsigned long long* mask_dev = NULL;
-  //THCudaCheck(THCudaMalloc(state, (void**) &mask_dev,
+  //AT_CUDA_CHECK (THCudaMalloc(state, (void**) &mask_dev,
   //                      boxes_num * col_blocks * sizeof(unsigned long long)));
 
   mask_dev = (unsigned long long*) c10::cuda::CUDACachingAllocator::raw_alloc(boxes_num * col_blocks * sizeof(unsigned long long));
@@ -98,7 +98,7 @@ at::Tensor nms_cuda(const at::Tensor boxes, float nms_overlap_thresh) {
                                   mask_dev);
 
   std::vector<unsigned long long> mask_host(boxes_num * col_blocks);
-  THCudaCheck(cudaMemcpy(&mask_host[0],
+  AT_CUDA_CHECK (cudaMemcpy(&mask_host[0],
                         mask_dev,
                         sizeof(unsigned long long) * boxes_num * col_blocks,
                         cudaMemcpyDeviceToHost));

@@ -126,7 +126,7 @@ class GTransformerContext(nn.Module):
         padding_size = max(num_obj)
         if self.use_weighted_graph_mask:
             res = np.ndarray((batch_size, padding_size, padding_size),
-                             dtype=np.float32)  # batch_size * max_obj_cnt * max_obj_cnt
+                             dtype=float)  # batch_size * max_obj_cnt * max_obj_cnt
             res[:, :, :] = -1
             start_index = 0
             for img_idx in range(len(num_obj)):
@@ -145,7 +145,7 @@ class GTransformerContext(nn.Module):
             return res
         else:
             res = np.ndarray((batch_size, padding_size, padding_size),
-                             dtype=np.bool)  # batch_size * max_obj_cnt * max_obj_cnt
+                             dtype=bool)  # batch_size * max_obj_cnt * max_obj_cnt
             res[:, :, :] = False
 
             start_index = 0
@@ -374,7 +374,7 @@ class DualTransPredictor(nn.Module):
         self.bias_module = build_bias_module(config, statistics)
         self.use_bias = config.MODEL.ROI_RELATION_HEAD.PREDICT_USE_BIAS
 
-    def forward(self, proposals, rel_pair_idxs, rel_labels, rel_binaries, roi_features, union_features, logger=None):
+    def forward(self, proposals, rel_pair_idxs, rel_labels, roi_features, union_features, logger=None, **kwargs):
         """
         Predicate rel label
         Args:

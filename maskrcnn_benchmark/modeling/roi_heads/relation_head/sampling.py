@@ -4,7 +4,6 @@ from torch.nn import functional as F
 import numpy as np
 import numpy.random as npr
 
-from maskrcnn_benchmark.modeling.box_coder import BoxCoder
 from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
 from maskrcnn_benchmark.modeling.utils import cat
 

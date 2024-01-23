@@ -41,9 +41,7 @@ conda activate rtpb
 + install dependencies
 
   ```
-  conda install ipython
-  conda install scipy
-  conda install h5py
+  conda install ipython scipy h5py
   pip install ninja yacs cython matplotlib tqdm opencv-python-headless overrides
   
   

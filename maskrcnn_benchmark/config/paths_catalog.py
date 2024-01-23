@@ -4,10 +4,11 @@
 import os
 import copy
 
+
 #
 class DatasetCatalog(object):
     # configure your dataset root here
-    DATA_DIR = "/path/to/your/dataset/root/"
+    DATA_DIR = "./data"  # "/path/to/your/dataset/root/"
     DATASETS = {
         "coco_2017_train": {
             "img_dir": "coco/train2017",
@@ -116,10 +117,10 @@ class DatasetCatalog(object):
             "image_file": "vg/image_data.json",
         },
         "VG_stanford_filtered_with_attribute": {
-            "img_dir": "vg/VG_100K",
-            "roidb_file": "vg/VG-SGG-with-attri.h5",
-            "dict_file": "vg/VG-SGG-dicts-with-attri.json",
-            "image_file": "vg/image_data.json",
+            "img_dir": "vg/images",
+            "roidb_file": "vg/annotations/VG-SGG-with-attri.h5",
+            "dict_file": "vg/annotations/VG-SGG-dicts-with-attri.json",
+            "image_file": "vg/annotations/image_data.json",
         },
         "VG_with_attribute": {
             "img_dir": "vg/VG_100K",
@@ -156,7 +157,7 @@ class DatasetCatalog(object):
         elif ("VG" in name) or ('GQA' in name):
             # name should be something like VG_stanford_filtered_train
             p = name.rfind("_")
-            name, split = name[:p], name[p+1:]
+            name, split = name[:p], name[p + 1:]
             assert name in DatasetCatalog.DATASETS and split in {'train', 'val', 'test'}
             data_dir = DatasetCatalog.DATA_DIR
             args = copy.deepcopy(DatasetCatalog.DATASETS[name])
@@ -165,7 +166,8 @@ class DatasetCatalog(object):
             args['split'] = split
             # IF MODEL.RELATION_ON is True, filter images with empty rels
             # else set filter to False, because we need all images for pretraining detector
-            args['filter_non_overlap'] = (not cfg.MODEL.ROI_RELATION_HEAD.USE_GT_BOX) and cfg.MODEL.RELATION_ON and cfg.MODEL.ROI_RELATION_HEAD.REQUIRE_BOX_OVERLAP
+            args['filter_non_overlap'] = (
+                                             not cfg.MODEL.ROI_RELATION_HEAD.USE_GT_BOX) and cfg.MODEL.RELATION_ON and cfg.MODEL.ROI_RELATION_HEAD.REQUIRE_BOX_OVERLAP
             args['filter_empty_rels'] = cfg.MODEL.RELATION_ON
             args['flip_aug'] = cfg.MODEL.FLIP_AUG
             args['custom_eval'] = cfg.TEST.CUSTUM_EVAL

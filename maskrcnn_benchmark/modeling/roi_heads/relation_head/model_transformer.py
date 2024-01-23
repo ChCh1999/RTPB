@@ -176,9 +176,8 @@ class TransformerEncoder(nn.Module):
     A encoder model with self attention mechanism.
     """
 
-    def __init__(self, n_layers, n_head, d_k, d_v, d_model, d_inner, dropout=0.1, graph_matrix=None):
+    def __init__(self, n_layers, n_head, d_k, d_v, d_model, d_inner, dropout=0.1):
         super().__init__()
-        self.graph_matrix = graph_matrix
         self.layer_stack = nn.ModuleList([
             EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
             for _ in range(n_layers)])
@@ -281,7 +280,7 @@ class TransformerContext(nn.Module):
 
         # label/logits embedding will be used as input
         if self.cfg.MODEL.ROI_RELATION_HEAD.USE_GT_OBJECT_LABEL:
-            obj_embed = self.obj_embed1(obj_labels)
+            obj_embed = self.obj_embed1(obj_labels.long())
         else:
             obj_logits = cat([proposal.get_field("predict_logits") for proposal in proposals], dim=0).detach()
             obj_embed = F.softmax(obj_logits, dim=1) @ self.obj_embed1.weight

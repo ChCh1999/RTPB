@@ -1,11 +1,12 @@
-GLOVE_DIR: $GLOVE_DIR
+GLOVE_DIR: model/glove/
 CONCEPTNET_DIR: /public/data1/users/chenchao278/data/conceptNet/
 INPUT:
-  MIN_SIZE_TRAIN: (600,)
+  MIN_SIZE_TRAIN: [ 600, ]
   MAX_SIZE_TRAIN: 1000
   MIN_SIZE_TEST: 600
   MAX_SIZE_TEST: 1000
 MODEL:
+  PRETRAINED_DETECTOR_CKPT: "model/detector/detector_base_x32/model_final.pth"
   META_ARCHITECTURE: "GeneralizedRCNN"
   WEIGHT: "catalog://ImageNetPretrained/FAIR/20171220/X-101-32x8d"
   BACKBONE:
@@ -20,9 +21,9 @@ MODEL:
   FLIP_AUG: False            # if there is any left-right relation, FLIP AUG should be false
   RPN:
     USE_FPN: True
-    ANCHOR_SIZES: (32, 64, 128, 256, 512)
-    ANCHOR_STRIDE: (4, 8, 16, 32, 64)
-    ASPECT_RATIOS: (0.23232838, 0.63365731, 1.28478321, 3.15089189)   # from neural-motifs
+    ANCHOR_SIZES: [ 32, 64, 128, 256, 512 ]
+    ANCHOR_STRIDE: [ 4, 8, 16, 32, 64 ]
+    ASPECT_RATIOS: [ 0.23232838, 0.63365731, 1.28478321, 3.15089189 ]   # from neural-motifs
     PRE_NMS_TOP_N_TRAIN: 6000
     PRE_NMS_TOP_N_TEST: 6000
     POST_NMS_TOP_N_TRAIN: 1000
@@ -40,7 +41,7 @@ MODEL:
     NMS_FILTER_DUPLICATES: True
   ROI_BOX_HEAD:
     POOLER_RESOLUTION: 7
-    POOLER_SCALES: (0.25, 0.125, 0.0625, 0.03125)
+    POOLER_SCALES: [ 0.25, 0.125, 0.0625, 0.03125 ]
     POOLER_SAMPLING_RATIO: 2
     FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
     PREDICTOR: "FPNPredictor"
@@ -53,15 +54,15 @@ MODEL:
     POS_WEIGHT: 50.0
     ATTRIBUTE_LOSS_WEIGHT: 1.0
     NUM_ATTRIBUTES: 201             # 201 for VG, 501 for GQA
-    MAX_ATTRIBUTES: 10             
-    ATTRIBUTE_BGFG_SAMPLE: True    
-    ATTRIBUTE_BGFG_RATIO: 3        
+    MAX_ATTRIBUTES: 10
+    ATTRIBUTE_BGFG_SAMPLE: True
+    ATTRIBUTE_BGFG_RATIO: 3
   ROI_RELATION_HEAD:
     USE_GT_BOX: True
     USE_GT_OBJECT_LABEL: False
     REQUIRE_BOX_OVERLAP: False              # for sgdet, during training, only train pairs with overlap
     ADD_GTBOX_TO_PROPOSAL_IN_TRAIN: True    # for sgdet only, in case some gt boxes are missing
-    NUM_CLASSES: 51                 # 51 for VG, 201 for GQA (not contain "to the left of" & "to the right of")
+    NUM_CLASSES: 51                 # 51 for VG, 201 for GQA [not contain "to the left of" & "to the right of"]
     BATCH_SIZE_PER_IMAGE: 1024      # sample as much as possible
     POSITIVE_FRACTION: 0.25
     CONTEXT_POOLING_DIM: 4096
@@ -73,7 +74,7 @@ MODEL:
     #PREDICTOR: "MotifPredictor"
     #PREDICTOR: "VCTreePredictor"
     PREDICTOR: "TransformerPredictor"
-#    PREDICTOR: "CausalAnalysisPredictor"
+    #    PREDICTOR: "CausalAnalysisPredictor"
     ################# Parameters for Motif Predictor ##################
     CONTEXT_OBJ_LAYER: 1
     CONTEXT_REL_LAYER: 1
@@ -96,9 +97,9 @@ MODEL:
       VAL_DIM: 64
       INNER_DIM: 2048
 DATASETS:
-  TRAIN: ("VG_stanford_filtered_with_attribute_train",)
-  VAL: ("VG_stanford_filtered_with_attribute_val",)
-  TEST: ("VG_stanford_filtered_with_attribute_test",)
+  TRAIN: [ "VG_stanford_filtered_with_attribute_train", ]
+  VAL: [ "VG_stanford_filtered_with_attribute_val", ]
+  TEST: [ "VG_stanford_filtered_with_attribute_test", ]
 DATALOADER:
   SIZE_DIVISIBILITY: 32
 SOLVER:
@@ -108,7 +109,7 @@ SOLVER:
   IMS_PER_BATCH: 16
   MAX_ITER: 16000
   WARMUP_ITERS: 500
-  STEPS: (10000, 16000)
+  STEPS: [ 10000, 16000 ]
   # end change
   WARMUP_FACTOR: 0.1
   WARMUP_METHOD: linear
@@ -127,8 +128,7 @@ SOLVER:
     COOLDOWN: 0
     FACTOR: 0.1
     MAX_DECAY_STEP: 5
-
-OUTPUT_DIR: './output/relation_baseline'
+OUTPUT_DIR: 'model/sgcls/'
 TEST:
   IMS_PER_BATCH: 4
   ALLOW_LOAD_FROM_CACHE: False

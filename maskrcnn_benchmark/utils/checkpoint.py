@@ -8,6 +8,7 @@ from maskrcnn_benchmark.utils.model_serialization import load_state_dict
 from maskrcnn_benchmark.utils.c2_model_loading import load_c2_format
 from maskrcnn_benchmark.utils.imports import import_file
 from maskrcnn_benchmark.utils.model_zoo import cache_url
+from maskrcnn_benchmark.config import paths_catalog
 
 
 class Checkpointer(object):
@@ -122,14 +123,11 @@ class DetectronCheckpointer(Checkpointer):
         super(DetectronCheckpointer, self).__init__(
             model, optimizer, scheduler, save_dir, save_to_disk, logger, custom_scheduler
         )
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
 
     def _load_file(self, f):
         # catalog lookup
         if f.startswith("catalog://"):
-            paths_catalog = import_file(
-                "maskrcnn_benchmark.config.paths_catalog", self.cfg.PATHS_CATALOG, True
-            )
             catalog_f = paths_catalog.ModelCatalog.get(f[len("catalog://"):])
             self.logger.info("{} points to {}".format(f, catalog_f))
             f = catalog_f

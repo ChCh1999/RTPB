@@ -111,10 +111,8 @@ class CrossTransformerEncoder(nn.Module):
     A encoder model with cross-attention mechanism.
     """
 
-    def __init__(self, n_layer, num_head, k_dim, v_dim, d_model_q, d_model_kv, d_inner, dropout_rate=0.1,
-                 graph_matrix=None):
+    def __init__(self, n_layer, num_head, k_dim, v_dim, d_model_q, d_model_kv, d_inner, dropout_rate=0.1):
         super().__init__()
-        self.graph_matrix = graph_matrix
         self.layer_stack = nn.ModuleList([
             CrossEncoderLayer(d_model_q, d_model_kv, d_inner, num_head, k_dim, v_dim, dropout=dropout_rate)
             for _ in range(n_layer)])

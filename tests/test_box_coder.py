@@ -38,7 +38,7 @@ class TestBoxCoder(unittest.TestCase):
                     208.80291748,
                 ]
             )
-            .astype(np.float32)
+            .astype(float)
             .reshape(-1, 4)
         )
 
@@ -67,7 +67,7 @@ class TestBoxCoder(unittest.TestCase):
                     0.79052375,
                 ]
             )
-            .astype(np.float32)
+            .astype(float)
             .reshape(-1, 4)
         )
 
@@ -96,7 +96,7 @@ class TestBoxCoder(unittest.TestCase):
                     269.686218,
                 ]
             )
-            .astype(np.float32)
+            .astype(float)
             .reshape(-1, 4)
         )
 

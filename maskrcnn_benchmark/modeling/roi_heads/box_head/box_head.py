@@ -22,7 +22,7 @@ class ROIBoxHead(torch.nn.Module):
 
     def __init__(self, cfg, in_channels):
         super(ROIBoxHead, self).__init__()
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
         self.feature_extractor = make_roi_box_feature_extractor(cfg, in_channels, half_out=self.cfg.MODEL.ATTRIBUTE_ON)
         self.predictor = make_roi_box_predictor(
             cfg, self.feature_extractor.out_channels)

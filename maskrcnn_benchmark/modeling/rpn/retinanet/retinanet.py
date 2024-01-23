@@ -94,7 +94,7 @@ class RetinaNetModule(torch.nn.Module):
     def __init__(self, cfg, in_channels):
         super(RetinaNetModule, self).__init__()
 
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
 
         anchor_generator = make_anchor_generator_retinanet(cfg)
         head = RetinaNetHead(cfg, in_channels)

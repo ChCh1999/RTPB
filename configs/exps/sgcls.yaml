@@ -1,0 +1,4 @@
+MODEL:
+  ROI_RELATION_HEAD:
+    USE_GT_BOX: True
+    USE_GT_OBJECT_LABEL: False

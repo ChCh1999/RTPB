@@ -25,6 +25,7 @@ def get_box_info(boxes, need_norm=True, proposal=None):
         box_info = box_info / float(max(max(proposal.size[0], proposal.size[1]), 100))
     return box_info
 
+
 def get_box_pair_info(box1, box2):
     """
     input: 
@@ -34,7 +35,7 @@ def get_box_pair_info(box1, box2):
         32-digits: [box1, box2, unionbox, intersectionbox]
     """
     # union box
-    unionbox = box1[:,:4].clone()
+    unionbox = box1[:, :4].clone()
     unionbox[:, 0] = torch.min(box1[:, 0], box2[:, 0])
     unionbox[:, 1] = torch.min(box1[:, 1], box2[:, 1])
     unionbox[:, 2] = torch.max(box1[:, 2], box2[:, 2])
@@ -42,19 +43,22 @@ def get_box_pair_info(box1, box2):
     union_info = get_box_info(unionbox, need_norm=False)
 
     # intersection box
-    intersextion_box = box1[:,:4].clone()
+    intersextion_box = box1[:, :4].clone()
     intersextion_box[:, 0] = torch.max(box1[:, 0], box2[:, 0])
     intersextion_box[:, 1] = torch.max(box1[:, 1], box2[:, 1])
     intersextion_box[:, 2] = torch.min(box1[:, 2], box2[:, 2])
     intersextion_box[:, 3] = torch.min(box1[:, 3], box2[:, 3])
-    case1 = torch.nonzero(intersextion_box[:, 2].contiguous().view(-1) < intersextion_box[:, 0].contiguous().view(-1)).view(-1)
-    case2 = torch.nonzero(intersextion_box[:, 3].contiguous().view(-1) < intersextion_box[:, 1].contiguous().view(-1)).view(-1)
+    case1 = torch.nonzero(
+        intersextion_box[:, 2].contiguous().view(-1) < intersextion_box[:, 0].contiguous().view(-1)).view(-1)
+    case2 = torch.nonzero(
+        intersextion_box[:, 3].contiguous().view(-1) < intersextion_box[:, 1].contiguous().view(-1)).view(-1)
     intersextion_info = get_box_info(intersextion_box, need_norm=False)
     if case1.numel() > 0:
         intersextion_info[case1, :] = 0
     if case2.numel() > 0:
         intersextion_info[case2, :] = 0
     return torch.cat((box1, box2, union_info, intersextion_info), 1)
+
 
 def nms_overlaps(boxes):
     """ get overlaps for each channel"""
@@ -70,13 +74,14 @@ def nms_overlaps(boxes):
     inter = torch.clamp((max_xy - min_xy + 1.0), min=0)
 
     # n, n, 151
-    inters = inter[:,:,:,0]*inter[:,:,:,1]
+    inters = inter[:, :, :, 0] * inter[:, :, :, 1]
     boxes_flat = boxes.view(-1, 4)
-    areas_flat = (boxes_flat[:,2]- boxes_flat[:,0]+1.0)*(
-        boxes_flat[:,3]- boxes_flat[:,1]+1.0)
+    areas_flat = (boxes_flat[:, 2] - boxes_flat[:, 0] + 1.0) * (
+            boxes_flat[:, 3] - boxes_flat[:, 1] + 1.0)
     areas = areas_flat.view(boxes.size(0), boxes.size(1))
     union = -inters + areas[None] + areas[:, None]
     return inters / union
+
 
 def layer_init(layer, init_para=0.1, normal=False, xavier=True):
     xavier = False if normal == True else True
@@ -98,8 +103,8 @@ def obj_prediction_nms(boxes_per_cls, pred_logits, nms_thresh=0.3):
     num_obj = pred_logits.shape[0]
     assert num_obj == boxes_per_cls.shape[0]
 
-    is_overlap = nms_overlaps(boxes_per_cls).view(boxes_per_cls.size(0), boxes_per_cls.size(0), 
-                              boxes_per_cls.size(1)).cpu().numpy() >= nms_thresh
+    is_overlap = nms_overlaps(boxes_per_cls).view(boxes_per_cls.size(0), boxes_per_cls.size(0),
+                                                  boxes_per_cls.size(1)).cpu().numpy() >= nms_thresh
 
     prob_sampled = F.softmax(pred_logits, 1).cpu().numpy()
     prob_sampled[:, 0] = 0  # set bg to 0
@@ -112,10 +117,32 @@ def obj_prediction_nms(boxes_per_cls, pred_logits, nms_thresh=0.3):
             pass
         else:
             pred_label[int(box_ind)] = int(cls_ind)
-        prob_sampled[is_overlap[box_ind,:,cls_ind], cls_ind] = 0.0
-        prob_sampled[box_ind] = -1.0 # This way we won't re-sample
+        prob_sampled[is_overlap[box_ind, :, cls_ind], cls_ind] = 0.0
+        prob_sampled[box_ind] = -1.0  # This way we won't re-sample
 
-    return pred_label 
+    return pred_label
+
+
+def nms_per_cls(obj_dists, boxes_per_cls, num_objs, nms_thresh):
+    obj_dists = obj_dists.split(num_objs, dim=0)
+    obj_preds = []
+    for i in range(len(num_objs)):
+        is_overlap = nms_overlaps(boxes_per_cls[i]).cpu().numpy() >= nms_thresh  # (#box, #box, #class)
+
+        out_dists_sampled = F.softmax(obj_dists[i], -1).cpu().numpy()
+        out_dists_sampled[:, 0] = -1
+
+        out_label = obj_dists[i].new(num_objs[i]).fill_(0)
+
+        for i in range(num_objs[i]):
+            box_ind, cls_ind = np.unravel_index(out_dists_sampled.argmax(), out_dists_sampled.shape)
+            out_label[int(box_ind)] = int(cls_ind)
+            out_dists_sampled[is_overlap[box_ind, :, cls_ind], cls_ind] = 0.0
+            out_dists_sampled[box_ind] = -1.0  # This way we won't re-sample
+
+        obj_preds.append(out_label.long())
+    obj_preds = torch.cat(obj_preds, dim=0)
+    return obj_preds
 
 
 def block_orthogonal(tensor, split_sizes, gain=1.0):

@@ -514,7 +514,7 @@ def show_box_attributes(image_data, vg_sgg, obj_attributes, vg_sgg_dicts, img_id
     attribute = obj_attributes[obj_idx]
     box[:2] = box[:2] - box[2:] / 2
     box[2:] = box[:2] + box[2:]
-    box = box.astype(np.float) / USE_BOX_SIZE * max(height, width)
+    box = box.astype(float) / USE_BOX_SIZE * max(height, width)
     draw_single_box(pic, box)
     att_list = []
     if attribute.sum() > 0:
@@ -550,7 +550,7 @@ def show_wrong_image(wrong_idx, vg_sgg, image_info):
     wrong_boxes = vg_sgg['boxes_1024'][ith_s : ith_e+1]
     wrong_boxes[:, :2] = wrong_boxes[:, :2] - wrong_boxes[:, 2:] / 2
     wrong_boxes[:, 2:] = wrong_boxes[:, :2] + wrong_boxes[:, 2:]
-    wrong_boxes = wrong_boxes.astype(np.float) / USE_BOX_SIZE * max(image_info[wrong_idx]['height'], image_info[wrong_idx]['width'])
+    wrong_boxes = wrong_boxes.astype(float) / USE_BOX_SIZE * max(image_info[wrong_idx]['height'], image_info[wrong_idx]['width'])
     
     return draw_boxes(image_info[wrong_idx]['image_id'], wrong_boxes)
 

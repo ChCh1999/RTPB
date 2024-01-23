@@ -1,4 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+from omegaconf import OmegaConf, ListConfig
+
 from . import transforms as T
 
 
@@ -21,7 +23,7 @@ def build_transforms(cfg, is_train=True):
         contrast = 0.0
         saturation = 0.0
         hue = 0.0
-
+    min_size = OmegaConf.to_container(min_size) if isinstance(min_size, ListConfig) else min_size
     to_bgr255 = cfg.INPUT.TO_BGR255
     normalize_transform = T.Normalize(
         mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD, to_bgr255=to_bgr255

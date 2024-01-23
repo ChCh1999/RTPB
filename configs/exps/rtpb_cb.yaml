@@ -1,0 +1,7 @@
+MODEL:
+  ROI_RELATION_HEAD:
+    BIAS_MODULE:
+      USE_PENALTY: True
+      PENALTY_BIAS:
+        PENALTY_TYPE: 'count_bias'
+        SCALE_WEIGHT: 1.0

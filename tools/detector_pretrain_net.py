@@ -5,6 +5,9 @@ Basic training script for PyTorch
 
 # Set up custom environment before nearly anything else is imported
 # NOTE: this should be the first import (no not reorder)
+from omegaconf import OmegaConf
+
+from maskrcnn_benchmark.config.utils import DEFAULT_CONFIG_FILE
 from maskrcnn_benchmark.utils.env import setup_environment  # noqa F401 isort:skip
 
 import argparse
@@ -27,7 +30,6 @@ from maskrcnn_benchmark.utils.imports import import_file
 from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir, save_config
 from maskrcnn_benchmark.utils.metric_logger import MetricLogger
-
 
 # See if we can use apex.DistributedDataParallel instead of the torch default,
 # and enable mixed-precision via apex.amp
@@ -95,9 +97,10 @@ def train(cfg, local_rank, distributed, logger):
     end = time.time()
     for iteration, (images, targets, _) in enumerate(train_data_loader, start_iter):
         model.train()
-        
+
         if any(len(target) < 1 for target in targets):
-            logger.error(f"Iteration={iteration + 1} || Image Ids used for training {_} || targets Length={[len(target) for target in targets]}" )
+            logger.error(
+                f"Iteration={iteration + 1} || Image Ids used for training {_} || targets Length={[len(target) for target in targets]}")
         data_time = time.time() - end
         iteration = iteration + 1
         arguments["iteration"] = iteration
@@ -179,10 +182,10 @@ def run_val(cfg, model, val_data_loaders, distributed):
     if cfg.MODEL.KEYPOINT_ON:
         iou_types = iou_types + ("keypoints",)
     if cfg.MODEL.RELATION_ON:
-        iou_types = iou_types + ("relations", )
+        iou_types = iou_types + ("relations",)
     if cfg.MODEL.ATTRIBUTE_ON:
-        iou_types = iou_types + ("attributes", )
-        
+        iou_types = iou_types + ("attributes",)
+
     dataset_names = cfg.DATASETS.VAL
     for dataset_name, val_data_loader in zip(dataset_names, val_data_loaders):
         inference(
@@ -210,9 +213,9 @@ def run_test(cfg, model, distributed):
     if cfg.MODEL.KEYPOINT_ON:
         iou_types = iou_types + ("keypoints",)
     if cfg.MODEL.RELATION_ON:
-        iou_types = iou_types + ("relations", )
+        iou_types = iou_types + ("relations",)
     if cfg.MODEL.ATTRIBUTE_ON:
-        iou_types = iou_types + ("attributes", )
+        iou_types = iou_types + ("attributes",)
     output_folders = [None] * len(cfg.DATASETS.TEST)
     dataset_names = cfg.DATASETS.TEST
     if cfg.OUTPUT_DIR:
@@ -221,10 +224,10 @@ def run_test(cfg, model, distributed):
             mkdir(output_folder)
             output_folders[idx] = output_folder
     data_loaders_val = make_data_loader(
-        cfg, 
-        mode='test', 
+        cfg,
+        mode='test',
         is_distributed=distributed
-        )
+    )
     for output_folder, dataset_name, data_loader_val in zip(output_folders, dataset_names, data_loaders_val):
         inference(
             cfg,
@@ -276,9 +279,10 @@ def main():
         )
         synchronize()
 
-    cfg.merge_from_file(args.config_file)
-    cfg.merge_from_list(args.opts)
-    cfg.freeze()
+    default_config = OmegaConf.load(DEFAULT_CONFIG_FILE)
+    loaded_cfg = OmegaConf.load(args.config_file)
+    ext_configs = OmegaConf.from_dotlist(args.opts)
+    cfg = OmegaConf.merge(default_config, loaded_cfg, ext_configs)
 
     output_dir = cfg.OUTPUT_DIR
     if output_dir:

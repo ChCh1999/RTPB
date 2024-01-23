@@ -43,7 +43,7 @@ class TestNMS(unittest.TestCase):
                     0.8,
                 ]
             )
-            .astype(np.float32)
+            .astype(float)
             .reshape(-1, 5)
         )
 
@@ -119,7 +119,7 @@ class TestNMS(unittest.TestCase):
                     [465.0900, 156.7555, 490.3561, 213.5704],
                     [107.5338, 173.4323, 141.0704, 235.2910],
                 ]
-            ).astype(np.float32)
+            ).astype(float)
         )
         scores = torch.from_numpy(
             np.array(
@@ -178,7 +178,7 @@ class TestNMS(unittest.TestCase):
                     0.0623,
                     0.1749,
                 ]
-            ).astype(np.float32)
+            ).astype(float)
         )
 
         gt_indices = np.array(

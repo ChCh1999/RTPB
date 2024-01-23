@@ -84,7 +84,7 @@ class ResNet(nn.Module):
 
         # If we want to use the cfg in forward(), then we should make a copy
         # of it and store it for later use:
-        # self.cfg = cfg.clone()
+        # self.cfg = cfg.copy()
 
         # Translate string names to implementations
         stem_module = _STEM_MODULES[cfg.MODEL.RESNETS.STEM_FUNC]

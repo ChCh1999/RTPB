@@ -4,13 +4,16 @@ from collections import deque
 
 import torch
 
+from maskrcnn_benchmark.config.utils import get_config
+
 
 class SmoothedValue(object):
     """Track a series of values and provide access to smoothed values over a
     window or the global series average.
     """
 
-    def __init__(self, window_size=20):
+    def __init__(self):
+        window_size = get_config().LOG_WINDOW_SIZE
         self.deque = deque(maxlen=window_size)
         self.series = []
         self.total = 0.0
@@ -38,7 +41,7 @@ class SmoothedValue(object):
 
 
 class MetricLogger(object):
-    def __init__(self, delimiter="\t"):
+    def __init__(self, delimiter="\n"):
         self.meters = defaultdict(SmoothedValue)
         self.delimiter = delimiter
 
@@ -55,12 +58,12 @@ class MetricLogger(object):
         if attr in self.__dict__:
             return self.__dict__[attr]
         raise AttributeError("'{}' object has no attribute '{}'".format(
-                    type(self).__name__, attr))
+            type(self).__name__, attr))
 
     def __str__(self):
         loss_str = []
         for name, meter in self.meters.items():
             loss_str.append(
-                "{}: {:.4f} ({:.4f})".format(name, meter.median, meter.global_avg)
+                "{:15}: \tmed: {:.4f};\tavg: {:.4f}; \tg_avg: {:.4f}".format(name, meter.median, meter.avg, meter.global_avg)
             )
         return self.delimiter.join(loss_str)

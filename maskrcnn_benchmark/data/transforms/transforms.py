@@ -3,6 +3,7 @@ import random
 
 import torch
 import torchvision
+from omegaconf import ListConfig
 from torchvision.transforms import functional as F
 
 from maskrcnn_benchmark.structures.bounding_box import BoxList
@@ -28,7 +29,7 @@ class Compose(object):
 
 class Resize(object):
     def __init__(self, min_size, max_size):
-        if not isinstance(min_size, (list, tuple)):
+        if not isinstance(min_size, (list, tuple, ListConfig)):
             min_size = (min_size,)
         self.min_size = min_size
         self.max_size = max_size
@@ -76,6 +77,7 @@ class RandomHorizontalFlip(object):
             target = target.transpose(0)
         return image, target
 
+
 class RandomVerticalFlip(object):
     def __init__(self, prob=0.5):
         self.prob = prob
@@ -85,6 +87,7 @@ class RandomVerticalFlip(object):
             image = F.vflip(image)
             target = target.transpose(1)
         return image, target
+
 
 class ColorJitter(object):
     def __init__(self,
@@ -97,7 +100,7 @@ class ColorJitter(object):
             brightness=brightness,
             contrast=contrast,
             saturation=saturation,
-            hue=hue,)
+            hue=hue, )
 
     def __call__(self, image, target):
         image = self.color_jitter(image)

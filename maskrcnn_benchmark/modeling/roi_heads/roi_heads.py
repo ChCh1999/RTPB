@@ -16,7 +16,7 @@ class CombinedROIHeads(torch.nn.ModuleDict):
 
     def __init__(self, cfg, heads):
         super(CombinedROIHeads, self).__init__(heads)
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
         if cfg.MODEL.MASK_ON and cfg.MODEL.ROI_MASK_HEAD.SHARE_BOX_FEATURE_EXTRACTOR:
             self.mask.feature_extractor = self.box.feature_extractor
         if cfg.MODEL.KEYPOINT_ON and cfg.MODEL.ROI_KEYPOINT_HEAD.SHARE_BOX_FEATURE_EXTRACTOR:

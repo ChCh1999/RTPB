@@ -11,6 +11,7 @@ from .inference import make_roi_relation_post_processor
 from .loss import make_roi_relation_loss_evaluator
 from .sampling import make_roi_relation_samp_processor
 
+
 class ROIRelationHead(torch.nn.Module):
     """
     Generic Relation Head class.
@@ -18,17 +19,18 @@ class ROIRelationHead(torch.nn.Module):
 
     def __init__(self, cfg, in_channels):
         super(ROIRelationHead, self).__init__()
-        self.cfg = cfg.clone()
+        self.cfg = cfg.copy()
         # same structure with box head, but different parameters
         # these param will be trained in a slow learning rate, while the parameters of box head will be fixed
-        # Note: there is another such extractor in uniton_feature_extractor
+        # Note: there is another such extractor in union_feature_extractor
         self.union_feature_extractor = make_roi_relation_feature_extractor(cfg, in_channels)
         if cfg.MODEL.ATTRIBUTE_ON:
-            self.box_feature_extractor = make_roi_box_feature_extractor(cfg, in_channels, half_out=True)
+            self.box_feature_extractor = make_roi_box_feature_extractor(cfg, in_channels, half_out=True,
+                                                                        for_relation=True)
             self.att_feature_extractor = make_roi_attribute_feature_extractor(cfg, in_channels, half_out=True)
             feat_dim = self.box_feature_extractor.out_channels * 2
         else:
-            self.box_feature_extractor = make_roi_box_feature_extractor(cfg, in_channels)
+            self.box_feature_extractor = make_roi_box_feature_extractor(cfg, in_channels, for_relation=True)
             feat_dim = self.box_feature_extractor.out_channels
         self.predictor = make_roi_relation_predictor(cfg, feat_dim)
         self.post_processor = make_roi_relation_post_processor(cfg)
@@ -56,9 +58,11 @@ class ROIRelationHead(torch.nn.Module):
             # relation subsamples and assign ground truth label during training
             with torch.no_grad():
                 if self.cfg.MODEL.ROI_RELATION_HEAD.USE_GT_BOX:
-                    proposals, rel_labels, rel_pair_idxs, rel_binarys = self.samp_processor.gtbox_relsample(proposals, targets)
+                    proposals, rel_labels, rel_pair_idxs, rel_binarys = self.samp_processor.gtbox_relsample(proposals,
+                                                                                                            targets)
                 else:
-                    proposals, rel_labels, rel_pair_idxs, rel_binarys = self.samp_processor.detect_relsample(proposals, targets)
+                    proposals, rel_labels, rel_pair_idxs, rel_binarys = self.samp_processor.detect_relsample(proposals,
+                                                                                                             targets)
         else:
             rel_labels, rel_binarys = None, None
             rel_pair_idxs = self.samp_processor.prepare_test_pairs(features[0].device, proposals)
@@ -74,10 +78,12 @@ class ROIRelationHead(torch.nn.Module):
             union_features = self.union_feature_extractor(features, proposals, rel_pair_idxs)
         else:
             union_features = None
-        
+
         # final classifier that converts the features into predictions
         # should corresponding to all the functions and layers after the self.context class
-        refine_logits, relation_logits, add_losses = self.predictor(proposals, rel_pair_idxs, rel_labels, rel_binarys, roi_features, union_features, logger)
+        refine_logits, relation_logits, add_losses = self.predictor(proposals, rel_pair_idxs, rel_labels,
+                                                                    roi_features, union_features, logger,
+                                                                    rel_binarys=rel_binarys)
 
         # for test
         if not self.training:

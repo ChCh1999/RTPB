@@ -61,8 +61,8 @@ def heatmaps_to_keypoints(maps, rois):
     maps = np.transpose(maps, [0, 2, 3, 1])
     min_size = 0  # cfg.KRCNN.INFERENCE_MIN_SIZE
     num_keypoints = maps.shape[3]
-    xy_preds = np.zeros((len(rois), 3, num_keypoints), dtype=np.float32)
-    end_scores = np.zeros((len(rois), num_keypoints), dtype=np.float32)
+    xy_preds = np.zeros((len(rois), 3, num_keypoints), dtype=float)
+    end_scores = np.zeros((len(rois), num_keypoints), dtype=float)
     for i in range(len(rois)):
         if min_size > 0:
             roi_map_width = int(np.maximum(widths_ceil[i], min_size))
